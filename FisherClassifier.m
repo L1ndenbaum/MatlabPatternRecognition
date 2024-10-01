@@ -16,18 +16,21 @@ merged_train_y(merged_train_y == 3) = 1; %合并13类 标签为1
 merged_train_y(merged_train_y == 4) = 2; %合并24类 标签为2
 
 % 分出13类和24类的阈值点y_0和投影向量
-[y_threshold1, w_star1] = binary_classification(train_X, merged_train_y);
+[y_threshold1, w_star1, w_01] = binary_classification(train_X, merged_train_y);
 
 % 分出1类和3类的阈值点y_0和投影向量
-[y_threshold2, w_star2] = binary_classification(train_X((train_y==1|train_y==3), :), train_y(train_y==1|train_y==3));
+[y_threshold2, w_star2, w_02] = binary_classification(train_X((train_y==1|train_y==3), :), ...
+                                                      train_y(train_y==1|train_y==3));
 
 % 分出2类和4类的阈值点y_0和投影向量
-[y_threshold3, w_star3] = binary_classification(train_X((train_y==2|train_y==4), :), train_y(train_y==2|train_y==4));
+[y_threshold3, w_star3, w_03] = binary_classification(train_X((train_y==2|train_y==4), :), ...
+                                                      train_y(train_y==2|train_y==4));
 
-pred_labels = predict(test_X, y_threshold1, y_threshold2, y_threshold3, w_star1, w_star2, w_star3);
+pred_labels = predict(test_X, y_threshold1, y_threshold2, y_threshold3, ...
+                      w_star1, w_star2, w_star3, w_01, w_02, w_03);
 res_visualization(train_X, train_y, test_X, pred_labels);
 
-function [y_threshold, w_star] = binary_classification(X, y)
+function [y_threshold, w_star, w_0] = binary_classification(X, y)
     % 二元分类函数 X是两类的所有样本, y是样本标签, classi_label是类i的标签
     num_features = 3; classes = unique(y); n_samples = size(y, 1);
     mu = zeros(2, num_features); % 均值向量
@@ -57,6 +60,7 @@ function [y_threshold, w_star] = binary_classification(X, y)
     end
 
     mu_hat = zeros(2, 1); % 两类样本在一维上投影的均值
+    w_0 = (mu_hat(1, 1) + mu_hat(2,1))/2;
     n_class_samples = zeros(2, 1);
 
     for i =1:2
@@ -77,18 +81,20 @@ function pred_class = classification(y_projection, y_threshold, class_label1, cl
     end
 end
 
-function pred_labels = predict(test_X, y_threshold1, y_threshold2, y_threshold3, w_star1, w_star2, w_star3)
+function pred_labels = predict(test_X, y_threshold1, y_threshold2, ...
+                                y_threshold3, w_star1, w_star2, w_star3, ...
+                                w_01, w_02, w_03)
     % 使用测试集进行预测
     n_samples = size(test_X, 1);
     pred_labels = zeros(n_samples, 1);
     for i = 1:n_samples
-        y_projection1 = test_X(i, :) * w_star1; % 一维投影点
+        y_projection1 = test_X(i, :) * w_star1 + w_01; % 一维投影点
         pred_label = classification(y_projection1, y_threshold1, 1, 2);
         if pred_label == 1 % 13类
-            y_projection2 = test_X(i, :) * w_star2;
+            y_projection2 = test_X(i, :) * w_star2 + w_02;
             pred_label = classification(y_projection2, y_threshold2, 1, 3);
         else % 24类
-            y_projection3 = test_X(i, :) * w_star3;
+            y_projection3 = test_X(i, :) * w_star3 + w_03;
             pred_label = classification(y_projection3, y_threshold3, 2, 4);
         end
         pred_labels(i) = pred_label;
