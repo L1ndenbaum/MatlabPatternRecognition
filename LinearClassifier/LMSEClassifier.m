@@ -1,4 +1,4 @@
-data = readmatrix("./Data/BayesClassifierData.xlsx");
+data = readmatrix("../Data/BayesClassifierData.xlsx");
 data(:, 4) = int16(data(: , 4));
 n_train = 29;
 n_test = 59 - n_train;
