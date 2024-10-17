@@ -1,0 +1,915 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>K_Means_Unsupervised</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-10-17"><meta name="DC.source" content="K_Means_Unsupervised.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">&#25968;&#25454;&#23548;&#20837;</a></li><li><a href="#2">&#36229;&#21442;&#25968;&#19982;&#21021;&#22987;&#21270;</a></li><li><a href="#3">&#36845;&#20195;&#36807;&#31243;</a></li><li><a href="#4">&#20989;&#25968;</a></li></ul></div><h2 id="1">&#25968;&#25454;&#23548;&#20837;</h2><pre class="codeinput">data = readmatrix(<span class="string">"../Data/BayesClassifierData.xlsx"</span>);
+data(:, 4) = int16(data(: , 4));
+n_samples = size(data, 1);
+X = data(1:n_samples, 1:3);
+y = zeros(n_samples, 1);
+</pre><h2 id="2">&#36229;&#21442;&#25968;&#19982;&#21021;&#22987;&#21270;</h2><pre class="codeinput">K = 4;
+[y, centers] = init(X, y, K);
+last_loss = loss_function(X, y, centers, K);
+</pre><h2 id="3">&#36845;&#20195;&#36807;&#31243;</h2><pre class="codeinput">num_iterations = 0;
+figure(<span class="string">'Position'</span>, [100, 100, 1400, 900]);
+
+<span class="keyword">while</span> true
+    num_iterations = num_iterations + 1;
+
+    plot_centers(centers, K);
+    [y, centers, loss] = iteration(X, y, K, centers, n_samples);
+    plot_res(X, y, K);
+    legend(<span class="string">'Class 1 Center'</span>, <span class="string">'Class 2 Center'</span>, <span class="string">'Class 3 Center'</span>, <span class="string">'Class 4 Center'</span>, <span class="keyword">...</span>
+       <span class="string">'Class 1'</span>, <span class="string">'Class 2'</span>, <span class="string">'Class 3'</span>, <span class="string">'Class 4'</span>);
+    title([<span class="string">'Iteration '</span>, num2str(num_iterations)]);
+    hold <span class="string">off</span>;
+
+    frame = getframe(gcf);
+    img = frame2im(frame);
+    [imind, cm] = rgb2ind(img, 256);
+    <span class="keyword">if</span> num_iterations == 1
+        imwrite(imind, cm, <span class="string">"ClusteringProcess_Unsupervised.gif"</span>, <span class="string">'gif'</span>, <span class="string">'Loopcount'</span>, inf, <span class="string">'DelayTime'</span>, 1.5);
+    <span class="keyword">else</span>
+        imwrite(imind, cm, <span class="string">"ClusteringProcess_Unsupervised.gif"</span>, <span class="string">'gif'</span>, <span class="string">'WriteMode'</span>, <span class="string">'append'</span>, <span class="string">'DelayTime'</span>, 1.5);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> loss == last_loss
+        <span class="keyword">break</span>;
+    <span class="keyword">else</span>
+        last_loss = loss;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+res_visualization(X, y, K);
+</pre><pre class="codeoutput">   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    1.7568    1.6520    1.5150
+    1.8036    1.5831    2.1631
+    2.3521    2.5570    1.4115
+    1.5712    1.7310    1.7353
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    1.8456    1.9188    2.2265
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    1.6515    1.7133    1.5704
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    1.8315    1.7131    1.6047
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    1.7836    1.5980    2.2613
+    1.5970    1.9215    2.1268
+    1.5989    1.9211    1.6233
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    1.5071    1.5569    1.9545
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+    1.9624    1.5950    1.8359
+    1.8021    1.7258    1.9663
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    1.9868    2.2922    1.5523
+
+   1.0e+03 *
+
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.4188    1.7759    2.7729
+    1.4496    1.6416    3.4051
+    0.8678    2.3347    2.5351
+    1.4946    2.0726    2.5505
+    1.2431    1.8141    3.4411
+    1.5801    1.7521    2.4630
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8174    1.9274    3.2858
+
+   1.0e+03 *
+
+    1.3019    1.8717    2.9440
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.3633    3.4779    2.4629
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3348    3.1948    2.2495
+
+   1.0e+03 *
+
+    0.1048    3.3898    2.4218
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.0645    3.4186    2.2834
+
+   1.0e+03 *
+
+    1.7568    1.6520    1.5150
+    1.8036    1.5831    2.1631
+    2.3521    2.5570    1.4115
+    1.5712    1.7310    1.7353
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    1.8456    1.9188    2.2265
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    1.6515    1.7133    1.5704
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    1.8315    1.7131    1.6047
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    1.5970    1.9215    2.1268
+    1.5989    1.9211    1.6233
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    1.5071    1.5569    1.9545
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+    1.9624    1.5950    1.8359
+    1.8021    1.7258    1.9663
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    2.0023    2.3374    1.4988
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.4188    1.7759    2.7729
+    1.4496    1.6416    3.4051
+    0.8678    2.3347    2.5351
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.2431    1.8141    3.4411
+    1.5801    1.7521    2.4630
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8174    1.9274    3.2858
+
+   1.0e+03 *
+
+    1.3676    1.8381    2.8561
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3326    3.1730    2.2331
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.1641    3.4384    2.3432
+
+   1.0e+03 *
+
+    1.7568    1.6520    1.5150
+    2.3521    2.5570    1.4115
+    1.5712    1.7310    1.7353
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    1.6807    1.5758    1.7251
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    1.6515    1.7133    1.5704
+    1.8779    1.8610    1.9753
+    1.8315    1.7131    1.6047
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    1.5989    1.9211    1.6233
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+    1.9624    1.5950    1.8359
+    1.8021    1.7258    1.9663
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    2.0834    2.4911    1.3398
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.8036    1.5831    2.1631
+    1.4188    1.7759    2.7729
+    1.8456    1.9188    2.2265
+    1.6926    1.8675    2.1090
+    1.4496    1.6416    3.4051
+    1.7028    1.6398    2.0687
+    0.8678    2.3347    2.5351
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.5970    1.9215    2.1268
+    1.2431    1.8141    3.4411
+    1.5071    1.5569    1.9545
+    1.5801    1.7521    2.4630
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8174    1.9274    3.2858
+
+   1.0e+03 *
+
+    1.4648    1.8110    2.6317
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.3540    3.3001    2.3736
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3437    3.1666    2.2155
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.1988    3.2504    2.4451
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.1728    3.3914    2.3687
+
+   1.0e+03 *
+
+    1.7568    1.6520    1.5150
+    2.3521    2.5570    1.4115
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    1.6515    1.7133    1.5704
+    1.8315    1.7131    1.6047
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    1.5989    1.9211    1.6233
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    2.1680    2.7115    1.1988
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.8036    1.5831    2.1631
+    1.5712    1.7310    1.7353
+    1.4188    1.7759    2.7729
+    1.8456    1.9188    2.2265
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    1.4496    1.6416    3.4051
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    0.8678    2.3347    2.5351
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.5970    1.9215    2.1268
+    1.2431    1.8141    3.4411
+    1.5071    1.5569    1.9545
+    1.5801    1.7521    2.4630
+    1.9624    1.5950    1.8359
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8021    1.7258    1.9663
+    1.8174    1.9274    3.2858
+
+   1.0e+03 *
+
+    1.5276    1.7884    2.4749
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3428    3.1544    2.2011
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.2090    3.3731    2.3697
+
+   1.0e+03 *
+
+    2.3521    2.5570    1.4115
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    2.2989    2.9863    1.0903
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    1.7568    1.6520    1.5150
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.8036    1.5831    2.1631
+    1.5712    1.7310    1.7353
+    1.4188    1.7759    2.7729
+    1.8456    1.9188    2.2265
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    1.4496    1.6416    3.4051
+    1.6515    1.7133    1.5704
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    0.8678    2.3347    2.5351
+    1.8315    1.7131    1.6047
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.5970    1.9215    2.1268
+    1.5989    1.9211    1.6233
+    1.2431    1.8141    3.4411
+    1.5071    1.5569    1.9545
+    1.5801    1.7521    2.4630
+    1.9624    1.5950    1.8359
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8021    1.7258    1.9663
+    1.8174    1.9274    3.2858
+
+   1.0e+03 *
+
+    1.5527    1.7831    2.3512
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3428    3.1544    2.2011
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.2090    3.3731    2.3697
+
+   1.0e+03 *
+
+    2.3521    2.5570    1.4115
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+
+   1.0e+03 *
+
+    2.3327    3.0789    1.0759
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    1.7568    1.6520    1.5150
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.8036    1.5831    2.1631
+    1.5712    1.7310    1.7353
+    1.4188    1.7759    2.7729
+    1.8456    1.9188    2.2265
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    1.4496    1.6416    3.4051
+    1.6515    1.7133    1.5704
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    0.8678    2.3347    2.5351
+    1.8315    1.7131    1.6047
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.5970    1.9215    2.1268
+    1.5989    1.9211    1.6233
+    1.2431    1.8141    3.4411
+    1.5071    1.5569    1.9545
+    1.5801    1.7521    2.4630
+    1.9624    1.5950    1.8359
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8021    1.7258    1.9663
+    1.8174    1.9274    3.2858
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    1.5630    1.7830    2.3155
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3428    3.1544    2.2011
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.2090    3.3731    2.3697
+
+   1.0e+03 *
+
+    2.3521    2.5570    1.4115
+    2.2973    3.3401    0.5356
+    2.0926    3.1772    0.5843
+    2.2056    3.2437    1.2027
+    2.9492    3.2444    0.6624
+    2.8029    3.0171    1.9850
+    2.0635    3.1998    1.2572
+    2.3750    3.3470    0.9753
+    2.2714    3.4830    0.9467
+    2.3363    2.6403    1.5996
+    2.1445    2.5016    0.5915
+    2.2019    3.1962    0.9355
+    2.2324    3.0779    1.2989
+
+   1.0e+03 *
+
+    2.3327    3.0789    1.0759
+
+   1.0e+03 *
+
+    1.7399    1.6752    2.3960
+    1.7568    1.6520    1.5150
+    0.8645    1.6473    2.6659
+    0.8779    2.0317    3.0712
+    1.8036    1.5831    2.1631
+    1.5712    1.7310    1.7353
+    1.4188    1.7759    2.7729
+    1.8456    1.9188    2.2265
+    1.6926    1.8675    2.1090
+    1.6807    1.5758    1.7251
+    1.4496    1.6416    3.4051
+    1.6515    1.7133    1.5704
+    1.7028    1.6398    2.0687
+    1.8779    1.8610    1.9753
+    0.8678    2.3347    2.5351
+    1.8315    1.7131    1.6047
+    1.7836    1.5980    2.2613
+    1.4946    2.0726    2.5505
+    1.5970    1.9215    2.1268
+    1.5989    1.9211    1.6233
+    1.2431    1.8141    3.4411
+    1.5071    1.5569    1.9545
+    1.5801    1.7521    2.4630
+    1.9624    1.5950    1.8359
+    1.4952    1.9574    3.4980
+    1.2453    1.5944    2.9377
+    1.2691    1.9107    2.7020
+    1.8021    1.7258    1.9663
+    1.8174    1.9274    3.2858
+    1.8604    1.7829    1.2781
+
+   1.0e+03 *
+
+    1.5630    1.7830    2.3155
+
+   1.0e+03 *
+
+    0.3733    3.0871    2.4295
+    0.2228    3.0595    2.0023
+    0.4013    3.2599    2.1510
+    0.4999    3.3058    2.1962
+    0.1728    3.0845    2.3857
+    0.3416    3.0766    2.4386
+    0.2910    3.0957    2.0889
+    0.2376    3.0778    2.2520
+    0.4607    3.2748    2.1730
+    0.4263    3.1053    2.0578
+    0.3431    3.2717    2.0369
+
+   1.0e+03 *
+
+    0.3428    3.1544    2.2011
+
+   1.0e+03 *
+
+    0.3633    3.4779    2.4629
+    0.1048    3.3898    2.4218
+    0.1988    3.2504    2.4451
+    0.3540    3.3001    2.3736
+    0.0242    3.4473    2.1450
+
+   1.0e+03 *
+
+    0.2090    3.3731    2.3697
+
+</pre><img vspace="5" hspace="5" src="K_Means_Unsupervised_01.png" alt=""> <h2 id="4">&#20989;&#25968;</h2><pre class="codeinput"><span class="keyword">function</span> [y, centers] = init(X, y, K)
+    n = size(y, 1);
+    center_idxs = randperm(n, K);
+    centers = X(center_idxs, :);
+    y(center_idxs) = linspace(1, K, K);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [y, centers, loss] = iteration(X, y, K, centers, n_samples)
+    <span class="keyword">for</span> i = 1:n_samples
+        distance = sum(power(centers-X(i, :), 2), 2);
+        [~, min_idx] = min(distance);
+        y(i) = min_idx;
+    <span class="keyword">end</span>
+
+    means = zeros(K, size(X, 2));
+    <span class="keyword">for</span> i = 1:K
+        disp(X(y==i, :));
+        disp(mean(X(y==i, :)));
+        means(i, :) = mean(X(y==i, :));
+    <span class="keyword">end</span>
+    centers = means;
+    loss = loss_function(X, y, means, K);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> loss = loss_function(X, y, means, K)
+    loss = 0;
+    <span class="keyword">for</span> i = 1:K
+        loss = loss + sum(sum(power(X(y==i|y==0, :) - means(i, :), 2), 1), 2);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_centers(centers, K)
+    plot_styles = {<span class="string">'rx'</span>, <span class="string">'gx'</span>, <span class="string">'bx'</span>, <span class="string">'kx'</span>};
+    <span class="keyword">for</span> i = 1:K
+        plot3(centers(i, 1), centers(i, 2), centers(i, 3), plot_styles{i}, <span class="string">'MarkerSize'</span>, 15, <span class="string">'LineWidth'</span>, 3);
+        hold <span class="string">on</span>;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_res(X, y, K)
+    plot_styles = {<span class="string">'ro'</span>, <span class="string">'go'</span>, <span class="string">'bo'</span>, <span class="string">'ko'</span>};
+    <span class="keyword">for</span> i = 1:K
+        class_samples = X(y==i, :);
+        <span class="keyword">if</span> size(class_samples, 1) == 0
+            disp(<span class="string">"&#32472;&#21046;&#26102;&#35813;&#31867;&#27809;&#26377;&#26679;&#26412;"</span>); disp(i);
+            <span class="keyword">continue</span>;
+        <span class="keyword">end</span>
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold <span class="string">on</span>;
+    <span class="keyword">end</span>
+    grid <span class="string">on</span>;
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> res_visualization(X, y, K)
+    plot_styles = {<span class="string">'ro'</span>, <span class="string">'go'</span>, <span class="string">'bo'</span>, <span class="string">'ko'</span>};
+    subplot(1, 2, 1) <span class="comment">% &#21407;&#25968;&#25454;&#20998;&#24067;</span>
+    plot3(X(:, 1), X(:, 2), X(:, 3), <span class="string">'ro'</span>);
+    grid <span class="string">on</span>;
+    title(<span class="string">'Data Distribution'</span>)
+
+    subplot(1, 2, 2) <span class="comment">% &#32858;&#31867;&#21518;&#25968;&#25454;</span>
+    <span class="keyword">for</span> i = 1:K
+        class_samples = X(y==i, :);
+        <span class="keyword">if</span> size(class_samples, 1) == 0
+            disp(<span class="string">"&#32472;&#21046;&#26102;&#35813;&#31867;&#27809;&#26377;&#26679;&#26412;"</span>); disp(i);
+            <span class="keyword">continue</span>;
+        <span class="keyword">end</span>
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold <span class="string">on</span>;
+    <span class="keyword">end</span>
+    grid <span class="string">on</span>;
+    title(<span class="string">'Clusters Distribution'</span>)
+    legend();
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 数据导入
+data = readmatrix("../Data/BayesClassifierData.xlsx");
+data(:, 4) = int16(data(: , 4));
+n_samples = size(data, 1);
+X = data(1:n_samples, 1:3);
+y = zeros(n_samples, 1);
+
+%% 超参数与初始化
+K = 4;
+[y, centers] = init(X, y, K);
+last_loss = loss_function(X, y, centers, K);
+
+%% 迭代过程
+num_iterations = 0;
+figure('Position', [100, 100, 1400, 900]);
+
+while true
+    num_iterations = num_iterations + 1;
+
+    plot_centers(centers, K);
+    [y, centers, loss] = iteration(X, y, K, centers, n_samples);
+    plot_res(X, y, K);
+    legend('Class 1 Center', 'Class 2 Center', 'Class 3 Center', 'Class 4 Center', ...
+       'Class 1', 'Class 2', 'Class 3', 'Class 4');
+    title(['Iteration ', num2str(num_iterations)]);
+    hold off;
+
+    frame = getframe(gcf);
+    img = frame2im(frame);
+    [imind, cm] = rgb2ind(img, 256);
+    if num_iterations == 1
+        imwrite(imind, cm, "ClusteringProcess_Unsupervised.gif", 'gif', 'Loopcount', inf, 'DelayTime', 1.5);
+    else
+        imwrite(imind, cm, "ClusteringProcess_Unsupervised.gif", 'gif', 'WriteMode', 'append', 'DelayTime', 1.5);
+    end
+    if loss == last_loss
+        break;
+    else
+        last_loss = loss;
+    end
+end
+
+res_visualization(X, y, K);
+
+%% 函数
+function [y, centers] = init(X, y, K)
+    n = size(y, 1);
+    center_idxs = randperm(n, K);
+    centers = X(center_idxs, :);
+    y(center_idxs) = linspace(1, K, K);
+end
+
+function [y, centers, loss] = iteration(X, y, K, centers, n_samples)
+    for i = 1:n_samples
+        distance = sum(power(centers-X(i, :), 2), 2);
+        [~, min_idx] = min(distance);
+        y(i) = min_idx;
+    end
+
+    means = zeros(K, size(X, 2));
+    for i = 1:K
+        disp(X(y==i, :));
+        disp(mean(X(y==i, :)));
+        means(i, :) = mean(X(y==i, :));
+    end
+    centers = means;
+    loss = loss_function(X, y, means, K);
+end
+
+function loss = loss_function(X, y, means, K)
+    loss = 0;
+    for i = 1:K
+        loss = loss + sum(sum(power(X(y==i|y==0, :) - means(i, :), 2), 1), 2);
+    end
+end
+
+function plot_centers(centers, K)
+    plot_styles = {'rx', 'gx', 'bx', 'kx'};
+    for i = 1:K
+        plot3(centers(i, 1), centers(i, 2), centers(i, 3), plot_styles{i}, 'MarkerSize', 15, 'LineWidth', 3);
+        hold on;
+    end
+end
+
+function plot_res(X, y, K)
+    plot_styles = {'ro', 'go', 'bo', 'ko'};
+    for i = 1:K
+        class_samples = X(y==i, :);
+        if size(class_samples, 1) == 0
+            disp("绘制时该类没有样本"); disp(i);
+            continue;
+        end
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold on;
+    end
+    grid on;
+
+end
+
+function res_visualization(X, y, K)
+    plot_styles = {'ro', 'go', 'bo', 'ko'};
+    subplot(1, 2, 1) % 原数据分布
+    plot3(X(:, 1), X(:, 2), X(:, 3), 'ro');
+    grid on;
+    title('Data Distribution')
+
+    subplot(1, 2, 2) % 聚类后数据
+    for i = 1:K
+        class_samples = X(y==i, :);
+        if size(class_samples, 1) == 0
+            disp("绘制时该类没有样本"); disp(i);
+            continue;
+        end
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold on;
+    end
+    grid on;
+    title('Clusters Distribution')
+    legend();
+end
+##### SOURCE END #####
+--></body></html>
