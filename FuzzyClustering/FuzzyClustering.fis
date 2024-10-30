@@ -1,0 +1,59 @@
+[System]
+Name='FuzzyClustering'
+Type='mamdani'
+Version=2.0
+NumInputs=3
+NumOutputs=1
+NumRules=10
+AndMethod='min'
+OrMethod='max'
+ImpMethod='min'
+AggMethod='max'
+DefuzzMethod='centroid'
+
+[Input1]
+Name='Feature_1'
+Range=[0 3000]
+NumMFs=4
+MF1='Small':'trapmf',[0 0 499 864]
+MF2='A_bit_samll':'trapmf',[499 864 1450 1571]
+MF3='A_bit_big':'trapmf',[1450 1571 1846 2064]
+MF4='Big':'trapmf',[1846 2064 3000 3000]
+
+[Input2]
+Name='Feature_2'
+Range=[0 3500]
+NumMFs=3
+MF1='Small':'trapmf',[1400 1400 2032 2557]
+MF2='big':'trapmf',[3017 3060 3500 3500]
+MF3='mid':'trapmf',[2032 2557 3017 3060]
+
+[Input3]
+Name='Feature_3'
+Range=[0 3500]
+NumMFs=4
+MF1='Small':'trapmf',[0 350 1412 1515]
+MF2='A_bit_small':'trapmf',[1412 1515 1735 2002]
+MF3='A_bit_big':'trapmf',[1735 2002 2463 2666]
+MF4='Big':'trapmf',[2463 2666 3500 3500]
+
+[Output1]
+Name='output1'
+Range=[0 5]
+NumMFs=4
+MF1='1':'trimf',[0 1 2]
+MF2='2':'trimf',[1 2 3]
+MF3='3':'trimf',[2 3 4]
+MF4='4':'trimf',[3 4 5]
+
+[Rules]
+2 1 4, 1 (1) : 1
+4 2 1, 2 (1) : 1
+4 3 1, 2 (1) : 1
+3 1 2, 3 (1) : 1
+3 1 3, 3 (1) : 1
+1 2 3, 4 (1) : 1
+3 1 4, 3 (1) : 1
+4 3 2, 3 (1) : 1
+3 3 2, 3 (1) : 1
+3 1 1, 3 (1) : 1

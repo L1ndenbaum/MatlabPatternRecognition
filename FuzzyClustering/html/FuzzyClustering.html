@@ -1,0 +1,198 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>FuzzyClustering</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-10-30"><meta name="DC.source" content="FuzzyClustering.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">&#25968;&#25454;&#23548;&#20837;</a></li><li><a href="#2">&#20998;&#31867;&#24182;&#32472;&#22270;</a></li></ul></div><h2 id="1">&#25968;&#25454;&#23548;&#20837;</h2><pre class="codeinput">data = readmatrix(<span class="string">"../Data/BayesClassifierData.xlsx"</span>);
+data(:, 4) = int16(data(: , 4));
+n_samples = size(data, 1);  n_train = 29;   n_test = 59 - n_train;
+train_X = data(1:n_train, 1:3);
+train_y = data(1:n_train, 4);
+test_X = data(n_train+1:n_train+n_test, 1:3);
+pred_y = zeros(n_test, 1);
+fis = readfis(<span class="string">'FuzzyClustering.fis'</span>);
+</pre><h2 id="2">&#20998;&#31867;&#24182;&#32472;&#22270;</h2><pre class="codeinput"><span class="keyword">for</span> i = 1:n_test
+    input = test_X(i, :);
+    output = int16(round(evalfis(fis, input)));
+    pred_y(i) = output;
+    disp([<span class="string">'Input: '</span>, num2str(input), <span class="string">'    --&gt;    '</span>, <span class="string">' Output: '</span>, num2str(output)]);
+<span class="keyword">end</span>
+
+res_visualization(train_X, train_y, test_X, pred_y)
+
+<span class="comment">% Functions</span>
+<span class="keyword">function</span> res_visualization(train_X, train_labels, test_X, pred_labels)
+    plot_styles = {<span class="string">'ro'</span>, <span class="string">'go'</span>, <span class="string">'bo'</span>, <span class="string">'ko'</span>};
+    classes = unique(train_labels);
+    num_classes = size(classes, 1);
+    subplot(1, 2, 1) <span class="comment">% &#35757;&#32451;&#25968;&#25454;&#21487;&#35270;&#21270;</span>
+    <span class="keyword">for</span> i = 1:num_classes
+        class_samples = train_X(train_labels==classes(i), :);
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold <span class="string">on</span>;
+    <span class="keyword">end</span>
+    grid <span class="string">on</span>;
+    title(<span class="string">'Train Distribution'</span>)
+    legend();
+
+    subplot(1, 2, 2) <span class="comment">% &#27979;&#35797;&#25968;&#25454;&#21487;&#35270;&#21270;</span>
+    <span class="keyword">for</span> i = 1:num_classes
+        class_samples = test_X(pred_labels==classes(i), :);
+        <span class="keyword">if</span> size(class_samples, 1) == 0
+            disp(<span class="string">"&#32472;&#21046;&#26102;&#35813;&#31867;&#27809;&#26377;&#26679;&#26412;"</span>); disp(i);
+            <span class="keyword">continue</span>;
+        <span class="keyword">end</span>
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold <span class="string">on</span>;
+    <span class="keyword">end</span>
+    grid <span class="string">on</span>;
+    title(<span class="string">'Test Distribution'</span>)
+    legend();
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Input: 1702.8        1639.79        2068.74    --&gt;     Output: 3
+Input: 1877.93        1860.96         1975.3    --&gt;     Output: 3
+Input: 867.81        2334.68         2535.1    --&gt;     Output: 1
+Input: 1831.49        1713.11        1604.65    --&gt;     Output: 3
+Input: 460.69        3274.77        2172.99    --&gt;     Output: 4
+Input: 2374.98        3346.98         975.31    --&gt;     Output: 2
+Input: 2271.39        3482.97          946.7    --&gt;     Output: 2
+Input: 1783.64        1597.99        2261.31    --&gt;     Output: 3
+Input: 198.83        3250.45        2445.08    --&gt;     Output: 4
+Input: 1494.63        2072.59        2550.51    --&gt;     Output: 2
+Input: 1597.03        1921.52        2126.76    --&gt;     Output: 3
+Input: 1598.93        1921.08        1623.33    --&gt;     Output: 3
+Input: 1243.13        1814.07        3441.07    --&gt;     Output: 1
+Input: 2336.31        2640.26        1599.63    --&gt;     Output: 3
+Input: 354        3300.12        2373.61    --&gt;     Output: 4
+Input: 2144.47        2501.62         591.51    --&gt;     Output: 2
+Input: 426.31        3105.29         2057.8    --&gt;     Output: 4
+Input: 1507.13        1556.89        1954.51    --&gt;     Output: 3
+Input: 343.07        3271.72        2036.94    --&gt;     Output: 4
+Input: 2201.94        3196.22         935.53    --&gt;     Output: 2
+Input: 2232.43        3077.87        1298.87    --&gt;     Output: 2
+Input: 1580.1        1752.07        2463.04    --&gt;     Output: 3
+Input: 1962.4        1594.97        1835.95    --&gt;     Output: 3
+Input: 1495.18        1957.44        3498.02    --&gt;     Output: 2
+Input: 1245.27        1594.39        2937.73    --&gt;     Output: 1
+Input: 24.22        3447.31        2145.01    --&gt;     Output: 4
+Input: 1269.07        1910.72        2701.97    --&gt;     Output: 1
+Input: 1802.07        1725.81        1966.35    --&gt;     Output: 3
+Input: 1817.36         1927.4        3285.79    --&gt;     Output: 3
+Input: 1860.45        1782.88        1278.13    --&gt;     Output: 3
+</pre><img vspace="5" hspace="5" src="FuzzyClustering_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 数据导入
+data = readmatrix("../Data/BayesClassifierData.xlsx");
+data(:, 4) = int16(data(: , 4));
+n_samples = size(data, 1);  n_train = 29;   n_test = 59 - n_train;
+train_X = data(1:n_train, 1:3);
+train_y = data(1:n_train, 4);
+test_X = data(n_train+1:n_train+n_test, 1:3);
+pred_y = zeros(n_test, 1);
+fis = readfis('FuzzyClustering.fis');
+
+%% 分类并绘图
+for i = 1:n_test
+    input = test_X(i, :);
+    output = int16(round(evalfis(fis, input)));
+    pred_y(i) = output;
+    disp(['Input: ', num2str(input), '    REPLACE_WITH_DASH_DASH>    ', ' Output: ', num2str(output)]);
+end
+
+res_visualization(train_X, train_y, test_X, pred_y)
+
+% Functions
+function res_visualization(train_X, train_labels, test_X, pred_labels)
+    plot_styles = {'ro', 'go', 'bo', 'ko'};
+    classes = unique(train_labels);
+    num_classes = size(classes, 1);
+    subplot(1, 2, 1) % 训练数据可视化
+    for i = 1:num_classes
+        class_samples = train_X(train_labels==classes(i), :);
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold on;
+    end
+    grid on;
+    title('Train Distribution')
+    legend();
+
+    subplot(1, 2, 2) % 测试数据可视化
+    for i = 1:num_classes
+        class_samples = test_X(pred_labels==classes(i), :);
+        if size(class_samples, 1) == 0
+            disp("绘制时该类没有样本"); disp(i);
+            continue;
+        end
+        plot3(class_samples(:, 1), class_samples(:, 2), class_samples(:, 3), plot_styles{i})
+        hold on;
+    end
+    grid on;
+    title('Test Distribution')
+    legend();
+end
+##### SOURCE END #####
+--></body></html>
